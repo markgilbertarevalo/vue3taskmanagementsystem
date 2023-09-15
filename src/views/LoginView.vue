@@ -53,17 +53,17 @@
     import axios from 'axios'
     import router from '@/router';
     import {useUserStore} from '../store/user-store'
-    import {useTaskStore} from '../store/task-store'
+    //import {useTaskStore} from '../store/task-store'
     import TextInput from '../components/global/TextInput.vue'
 
     const userStore = useUserStore()
-    const taskStore = useTaskStore()
+    //const taskStore = useTaskStore()
     let errors =ref([])
     let email = ref(null)
     let password = ref(null)
 
-    let taskParam = {'filter[title]': '', 'sort': '-created_at'}
-
+    //let taskParam = {'filter[title]': '', 'sort': '-created_at'}
+  
     const login = async () => {
         errors.value = []
         
@@ -76,7 +76,7 @@
             axios.defaults.headers.common['Authorization'] = 'Bearer ' + res.data.token
             //console.log(res)
             userStore.setUserDetails(res)
-            await taskStore.fetchTasks(taskParam) 
+            //await taskStore.fetchTasks(taskParam) 
             router.push('/')
         }catch(err){
             errors.value = err.response.data.errors

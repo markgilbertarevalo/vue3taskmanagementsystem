@@ -13,9 +13,21 @@ export const useTaskStore = defineStore("task", {
     //   this.$state.task = res.data.token;
     //   this.$state.status = res.data.user.first_name;
     // },
-    async fetchTasks(param) {
-      let res = await axios.get("api/tasks/", { param });
-      this.$state.tasks = res.data;
+    async fetchTasks(sort, filter) {
+      let res = await axios.get(
+        "api/tasks/", // ?filter[title]=" + filter.value + "&sort=" + sort.value + "");
+        {
+          params: {
+            sort: sort.value,
+            "filter[title]": filter.value,
+          },
+        }
+      );
+      this.$state.tasks = res.data.data;
+    },
+
+    postImage(image) {
+      return process.env.VUE_APP_API_URL + "images/tasks/" + image;
     },
 
     clearUser() {
