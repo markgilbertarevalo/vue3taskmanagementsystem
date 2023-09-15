@@ -15,16 +15,21 @@
                             input-type="text"
                             :error="errors.title ? errors.title[0] : ''"
                         />
+                        <!-- <input type="text" v-model="title" class="form-control form-control-lg"
+                            placeholder="Enter a valid First Name" />
+                        <span v-if="errors" class="text-danger">
+                            {{ errors.title ? errors.title[0] : '' }}
+                    </span> -->
                     </div>
 
                     
 
-                    <div class="form-outline mb-4">
-                        <input type="file" ref="fileInput" @change="handleFileChange" id="image" accept="image/*">
-                        <span v-if="errors" class="text-danger">
-                            {{ errors.image ? errors.image[0] : '' }}
-                        </span>
-                    </div>
+                    <select  v-model="status" class="form-select form-select-lg mb-3" aria-label="Large select example">
+                        <!-- <option selected>{{ status }}</option> -->
+                        <option value="Todo">Todo</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                    </select>
 
                     <div class="text-center text-lg-start mt-4 pt-2">
                     <button type="button" class="btn btn-primary btn-lg" @click="submit"
@@ -45,49 +50,41 @@
     import {ref} from 'vue'
     import axios from 'axios'
     import router from '@/router';
+    //import { useRoute } from 'vue-router';
     import TextInput from '@/components/global/TextInput.vue';
     import {useUserStore} from '../store/user-store'
+    //import { onMounted } from 'vue';
     import Swal from '@/sweetalert2';
+    import {useEditTaskStore} from '../store/edittask-store'
 
+    const editTaskStore = useEditTaskStore()
     const userStore = useUserStore()
+    //const route = useRoute()
     let errors = ref([])
-    const title = ref([null])
-    // Create a ref for the selected file
-    const selectedFile = ref(null);
-
-    // Handle file input change
-    const handleFileChange = (event) => {
-        selectedFile.value = event.target.files[0];
-    };
+    const title = ref(editTaskStore.task.attributes.title||'')
+    const status = ref(editTaskStore.task.attributes.status||'');
+    const id = editTaskStore.task.id
 
     const submit = async () => {
         errors.value = []
-        if (selectedFile.value === null) {
-            Swal.fire(
-                'No image found?',
-                'Please add an image of your choice and complete all other inputs.',
-                'warning'
-            )
-            return null
-        }
-        try{
-            axios.defaults.headers.common['Authorization'] = 'Bearer ' + userStore.token
-            
-            const formData = new FormData();
-                formData.append('image', selectedFile.value || '');
-                formData.append('title', title.value || '');
+        axios.defaults.headers.common['Authorization'] = 'Bearer ' + userStore.token
+        let data = new FormData()
+        console.log(id)
+        data.append('title', title.value || '')
+        data.append('status', status.value || '')
+        data.append('id', id)
 
-            await axios.post('api/tasks', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            })
+        try{
+            
+            await axios.post('api/tasks/?_method=PUT', data)
             
             Swal.fire(
-                'New task created!',
-                'The task you created was called "' + title.value + '"',
+                'Task Updated!',
+                'The task you updated was called "' + title.value + '"',
                 'success'
             )
+
+            //editTaskStore.clearTask()
             
             router.push('/')
         }catch(err){
@@ -95,6 +92,11 @@
             errors.value = err.response.data.errors
         }
     }
+
+    // onMounted(async()=>{
+    //   //axios.defaults.headers.common['Authorization'] = 'Bearer ' + userStore.token
+    //   await editTaskStore.fetchTask(route.params.id)
+    // })
 </script>
 
 <style scoped>

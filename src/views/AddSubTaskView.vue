@@ -10,20 +10,11 @@
                     <div class="form-outline mb-4">
                         <TextInput
                             label="Title"
-                            placeholder="Task"
+                            placeholder="Sub Task"
                             v-model:input="title"
                             input-type="text"
                             :error="errors.title ? errors.title[0] : ''"
                         />
-                    </div>
-
-                    
-
-                    <div class="form-outline mb-4">
-                        <input type="file" ref="fileInput" @change="handleFileChange" id="image" accept="image/*">
-                        <span v-if="errors" class="text-danger">
-                            {{ errors.image ? errors.image[0] : '' }}
-                        </span>
                     </div>
 
                     <div class="text-center text-lg-start mt-4 pt-2">
@@ -47,40 +38,23 @@
     import router from '@/router';
     import TextInput from '@/components/global/TextInput.vue';
     import {useUserStore} from '../store/user-store'
+    import {useParentTaskStore} from '../store/parenttask-store.js'
     import Swal from '@/sweetalert2';
 
+    const parentTaskStore = useParentTaskStore()
     const userStore = useUserStore()
     let errors = ref([])
     const title = ref([null])
-    // Create a ref for the selected file
-    const selectedFile = ref(null);
-
-    // Handle file input change
-    const handleFileChange = (event) => {
-        selectedFile.value = event.target.files[0];
-    };
 
     const submit = async () => {
         errors.value = []
-        if (selectedFile.value === null) {
-            Swal.fire(
-                'No image found?',
-                'Please add an image of your choice and complete all other inputs.',
-                'warning'
-            )
-            return null
-        }
+
         try{
             axios.defaults.headers.common['Authorization'] = 'Bearer ' + userStore.token
             
-            const formData = new FormData();
-                formData.append('image', selectedFile.value || '');
-                formData.append('title', title.value || '');
-
-            await axios.post('api/tasks', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
+            await axios.post('api/subtask', {
+                title: title.value,
+                task_id: parentTaskStore.task.id,
             })
             
             Swal.fire(
@@ -88,8 +62,8 @@
                 'The task you created was called "' + title.value + '"',
                 'success'
             )
-            
-            router.push('/')
+            await parentTaskStore.fetchTask(parentTaskStore.task.id)
+            router.push('/task')
         }catch(err){
             console.log(err)
             errors.value = err.response.data.errors

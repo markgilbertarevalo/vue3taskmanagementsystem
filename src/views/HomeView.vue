@@ -2,8 +2,8 @@
   <div class="home">
     <h1>Tasks</h1>
     <div>
-      <input v-model="filter" v-on:keyup="search" placeholder="Type something...">
-      <button type="button" class="btn btn-primary" @click="changeSort">{{ sort }}</button>
+      <input v-model="filter" v-on:keyup="search" placeholder="Search Task Title...">
+      <button type="button" class="btn btn-primary" @click="changeSort">Sort</button>
       <button type="button" class="btn btn-primary" @click="addTask">Add Task</button>
     </div>
     <div class="container tasks" >
@@ -16,7 +16,13 @@
               <div>
                 <img width="150" height="150" class="rounded" :src="taskStore.postImage(task.attributes.image)" alt="" />
               </div>
-              <div><button type="button" class="btn btn-default" @click="viewTask(task.id)">View</button></div>
+              
+              
+            </div>
+            <div class="container" style="margin-top:150px;">
+                <button type="button" class="btn btn-success" @click="viewTask(task.id)">View</button>
+                <button type="button" class="btn btn-warning" @click="editTask(task.id)">Edit</button>
+                <button type="button" class="btn btn-danger" @click="deleteTask(task.id)">Delete</button>
             </div>
             <span class="badge bg-primary rounded-pill"> {{ task.attributes.status }}</span>
           </li>
@@ -33,8 +39,11 @@
     import {useUserStore} from '../store/user-store'
     import {useTaskStore} from '../store/task-store'
     import {useParentTaskStore} from '../store/parenttask-store.js'
+    import { useEditTaskStore } from '@/store/edittask-store';
     import { onMounted } from 'vue';
+    import Swal from '@/sweetalert2'; 
 
+    const editTaskStore = useEditTaskStore()
     const userStore = useUserStore()
     const taskStore = useTaskStore()
     const parentTaskStore = useParentTaskStore()
@@ -68,10 +77,43 @@
       router.push('/addtask')
     }
 
+    const editTask = async (id) => {
+      await editTaskStore.fetchTask(id)
+      router.push('/edittask/')
+    }
+
     const viewTask = async (id) => {
       //axios.defaults.headers.common['Authorization'] = 'Bearer ' + userStore.token
       await parentTaskStore.fetchTask(id)
       router.push('/task')
+    }
+
+    const deleteTask = async (id) => {
+        Swal.fire({
+            title: 'Are you sure you want to delete this',
+            text: 'You won\t be able to revert this!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+        }).then(async (result) => {
+            if (result.isConfirmed){
+                try{
+                    await axios.delete('api/tasks/' + id + '')
+
+                    await taskStore.fetchTasks(sort, filter)
+
+                    Swal.fire(
+                        'Deleted!',
+                        'Your file has been deleted.',
+                        'success'
+                    )
+                }catch(err){
+                    console.log(err)
+                }
+            }
+        })
     }
     
     onMounted(async()=>{
@@ -83,5 +125,8 @@
 <style scoped>
   .tasks {
     margin-top: 50px;
+  }
+  .btn{
+    margin-left: 10px ;
   }
 </style>
