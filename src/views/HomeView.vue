@@ -3,31 +3,33 @@
     <h1>Tasks</h1>
     <div>
       <input v-model="filter" v-on:keyup="search" placeholder="Search Task Title...">
-      <button type="button" class="btn btn-primary" @click="changeSort">Sort</button>
-      <button type="button" class="btn btn-primary" @click="addTask">Add Task</button>
+      <button type="button" class="btn btn-primary btntop" @click="changeSort">Sort</button>
+      <button type="button" class="btn btn-primary btntop" @click="addTask">Add Task</button>
     </div>
     <div class="container tasks" >
-      <!-- <EventCard v-for="event in events" :key="event.id" :event="event" /> -->
-      <ol class="list-group list-group-numbered">
-        <div v-for="task in taskStore.tasks" :key="task" class="">
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div class="ms-2 me-auto">
-              <div class="fw-bold">{{ task.attributes.title }}</div>
-              <div>
-                <img width="150" height="150" class="rounded" :src="taskStore.postImage(task.attributes.image)" alt="" />
-              </div>
-              
-              
-            </div>
-            <div class="container" style="margin-top:150px;">
-                <button type="button" class="btn btn-success" @click="viewTask(task.id)">View</button>
-                <button type="button" class="btn btn-warning" @click="editTask(task.id)">Edit</button>
-                <button type="button" class="btn btn-danger" @click="deleteTask(task.id)">Delete</button>
-            </div>
-            <span class="badge bg-primary rounded-pill"> {{ task.attributes.status }}</span>
-          </li>
-        </div>
-      </ol>
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th scope="col">Image</th>
+            <th scope="col">Title</th>
+            <th scope="col">Action</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody class="table-group-divider">
+          <tr v-for="task in taskStore.tasks" :key="task">
+            
+            <td><img width="70" height="70" class="rounded" :src="taskStore.postImage(task.attributes.image)" alt="" /></td>
+            <td><p class="tdTitle">{{ task.attributes.title }}</p></td>
+            <td>
+                <button type="button" class="btn btn-success btntable" @click="viewTask(task.id)">View</button>
+                <button type="button" class="btn btn-warning btntable" @click="editTask(task.id)">Edit</button>
+                <button type="button" class="btn btn-danger btntable" @click="deleteTask(task.id)">Delete</button>
+            </td>
+            <td><span class="badge bg-primary rounded-pill"> {{ task.attributes.status }}</span></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -125,8 +127,16 @@
 <style scoped>
   .tasks {
     margin-top: 50px;
+    
   }
-  .btn{
+  .btntable{
     margin-left: 10px ;
+    margin-top: 15px;
+  }
+  .btntop{
+    margin-left: 10px ;
+  }
+  .tdTitle{
+    margin-top: 18px;
   }
 </style>

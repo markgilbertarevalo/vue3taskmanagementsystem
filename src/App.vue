@@ -1,12 +1,45 @@
 <template>
   <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link> |  
+    <router-link to="/">Home</router-link> | 
     <router-link to="/about">Recycle Bin</router-link> |
-    <router-link to="/about">Logout</router-link>
+    <router-link to="/login" @click="logout">Logout</router-link>
   </nav>
   <router-view/>
 </template>
+<script setup>
+  import axios from 'axios';
+  import router from '@/router';
+  import { useEditSubTaskStore } from './store/editsubtask-store';
+  import { useEditTaskStore } from './store/edittask-store';
+  import { useParentTaskStore } from './store/parenttask-store';
+  import { useTaskStore } from './store/task-store';
+  import { useUserStore } from './store/user-store';
+
+  const editSubTaskStore = useEditSubTaskStore()
+  const editTaskStore = useEditTaskStore()
+  const parentTaskStore = useParentTaskStore()
+  const taskStore = useTaskStore()
+  const userStore = useUserStore()
+
+  axios.defaults.headers.common['Authorization'] = 'Bearer ' + userStore.token
+
+  const logout = async () => {
+        try{
+            await axios.get('api/logout')
+
+            // console.log(res)
+            userStore.clearUser()
+            editSubTaskStore.clearTask()
+            editTaskStore.clearTask()
+            parentTaskStore.clearUser()
+            taskStore.clearUser()
+
+            router.push('/login')
+        }catch(err){
+            console.log(err)
+        }
+    }
+</script>
 
 <style lang="scss">
 #app {

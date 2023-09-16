@@ -17,11 +17,13 @@
                         />
                     </div>
 
-                    <div class="text-center text-lg-start mt-4 pt-2">
-                    <button type="button" class="btn btn-primary btn-lg" @click="submit"
-                        style="padding-left: 2.5rem; padding-right: 2.5rem;">Submit</button>
-                    
+                    <div class="">
+                        <button type="button" class="btn btn-default btn-lg" @click="back"
+                            >Back</button>
+                        <button type="button" class="btn btn-primary btn-lg" @click="submit"
+                            >Submit</button>
                     </div>
+
                     
                 </form>
             </div>
@@ -69,10 +71,18 @@
             errors.value = err.response.data.errors
         }
     }
+
+    const back = () =>{
+        router.push('/task')
+    }
 </script>
 
 <style scoped>
   .tasks {
     margin-top: 50px;
   }
+  .btn{
+    margin-left: 5px;
+    margin-right: 5px;
+    }
 </style>
