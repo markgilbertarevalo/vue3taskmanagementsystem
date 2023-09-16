@@ -53,11 +53,11 @@
     import axios from 'axios'
     import router from '@/router';
     import {useUserStore} from '../store/user-store'
-    //import {useTaskStore} from '../store/task-store'
+    import {useRecycleTaskStore} from '../store/recycletask-store'
     import TextInput from '../components/global/TextInput.vue'
 
     const userStore = useUserStore()
-    //const taskStore = useTaskStore()
+    const recycleTaskStore = useRecycleTaskStore()
     let errors =ref([])
     let email = ref(null)
     let password = ref(null)
@@ -76,6 +76,7 @@
             axios.defaults.headers.common['Authorization'] = 'Bearer ' + res.data.token
             //console.log(res)
             userStore.setUserDetails(res)
+            recycleTaskStore.fetchTasks('-created_at', '')
             //await taskStore.fetchTasks(taskParam) 
             router.push('/')
         }catch(err){

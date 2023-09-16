@@ -1,7 +1,7 @@
 <template>
   <nav>
     <router-link to="/">Home</router-link> | 
-    <router-link to="/about">Recycle Bin</router-link> |
+    <router-link to="/recyclebin">Recycle Bin</router-link> |
     <router-link to="/login" @click="logout">Logout</router-link>
   </nav>
   <router-view/>
@@ -14,12 +14,14 @@
   import { useParentTaskStore } from './store/parenttask-store';
   import { useTaskStore } from './store/task-store';
   import { useUserStore } from './store/user-store';
+  import { useRecycleTaskStore } from './store/recycletask-store';
 
   const editSubTaskStore = useEditSubTaskStore()
   const editTaskStore = useEditTaskStore()
   const parentTaskStore = useParentTaskStore()
   const taskStore = useTaskStore()
   const userStore = useUserStore()
+  const recycleTaskStore = useRecycleTaskStore()
 
   axios.defaults.headers.common['Authorization'] = 'Bearer ' + userStore.token
 
@@ -33,6 +35,7 @@
             editTaskStore.clearTask()
             parentTaskStore.clearUser()
             taskStore.clearUser()
+            recycleTaskStore.clearUser()
 
             router.push('/login')
         }catch(err){

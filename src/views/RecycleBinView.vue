@@ -1,10 +1,10 @@
 <template>
   <div class="home">
-    <h1>Tasks</h1>
+    <h1>Bin</h1>
     <div>
       <input v-model="filter" v-on:keyup="search" placeholder="Search Task Title...">
       <button type="button" class="btn btn-primary btntop" @click="changeSort">Sort</button>
-      <button type="button" class="btn btn-primary btntop" @click="addTask">Add Task</button>
+      <button type="button" class="btn btn-danger btntop" @click="deleteAll">Delete All</button>
     </div>
     <div class="container tasks" >
       <table class="table table-striped table-hover">
@@ -17,13 +17,12 @@
           </tr>
         </thead>
         <tbody class="table-group-divider">
-          <tr v-for="task in taskStore.tasks" :key="task">
+          <tr v-for="task in recycleTaskStore.tasks" :key="task">
             
             <td><img width="70" height="70" class="rounded" :src="taskStore.postImage(task.attributes.image)" alt="" /></td>
             <td><p class="tdTitle">{{ task.attributes.title }}</p></td>
             <td>
-                <button type="button" class="btn btn-success btntable" @click="viewTask(task.id)">View</button>
-                <button type="button" class="btn btn-warning btntable" @click="editTask(task.id)">Edit</button>
+                <button type="button" class="btn btn-warning btntable" @click="restoreTask(task.id)">Restore</button>
                 <button type="button" class="btn btn-danger btntable" @click="deleteTask(task.id)">Delete</button>
             </td>
             <td><span class="badge bg-primary rounded-pill"> {{ task.attributes.status }}</span></td>
@@ -37,19 +36,14 @@
 <script setup>
     import {ref} from 'vue';
     import axios from 'axios'
-    import router from '@/router';
     import {useUserStore} from '../store/user-store'
     import {useTaskStore} from '../store/task-store'
-    import {useParentTaskStore} from '../store/parenttask-store.js'
-    import { useEditTaskStore } from '@/store/edittask-store';
+    import {useRecycleTaskStore} from '../store/recycletask-store'
     import { onMounted } from 'vue';
     import Swal from '@/sweetalert2'; 
-    import { useRecycleTaskStore } from '@/store/recycletask-store';
 
-    const editTaskStore = useEditTaskStore()
     const userStore = useUserStore()
     const taskStore = useTaskStore()
-    const parentTaskStore = useParentTaskStore()
     const recycleTaskStore = useRecycleTaskStore()
     
     const sort = ref('-created_at');
@@ -68,28 +62,69 @@
       isSort.value = !isSort.value;
 
      
-      await taskStore.fetchTasks(sort, filter)
+      await recycleTaskStore.fetchTasks(sort, filter)
     };
 
     const search = async () => {
-      //axios.defaults.headers.common['Authorization'] = 'Bearer ' + userStore.token
-      await taskStore.fetchTasks(sort, filter)
+      await recycleTaskStore.fetchTasks(sort, filter)
     };
 
-    const addTask = async () => {
-      
-      router.push('/addtask')
+    const deleteAll = async () => {
+        Swal.fire({
+            title: 'Are you sure you want to delete all of it?',
+            text: 'You won\t be able to revert this!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, do it!',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+        }).then(async (result) => {
+            if (result.isConfirmed){
+                try{
+                    await axios.delete('api/trash')
+
+                    await recycleTaskStore.fetchTasks(sort, filter)
+                    await taskStore.fetchTasks(sort, filter)
+                    Swal.fire(
+                        'Success!',
+                        'Your bin is empty.',
+                        'success'
+                    )
+                }catch(err){
+                    console.log(err)
+                }
+            }
+        })
     }
 
-    const editTask = async (id) => {
-      await editTaskStore.fetchTask(id)
-      router.push('/edittask/')
-    }
+    const restoreTask = async (id) => {
+        Swal.fire({
+            title: 'Are you sure you want to restore this',
+            text: 'You won\t be able to revert this!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, do it!',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+        }).then(async (result) => {
+            if (result.isConfirmed){
+                try{
+                    await axios.post('api/restore', {
+                        id: id,
+                    })
 
-    const viewTask = async (id) => {
-      //axios.defaults.headers.common['Authorization'] = 'Bearer ' + userStore.token
-      await parentTaskStore.fetchTask(id)
-      router.push('/task')
+                    await recycleTaskStore.fetchTasks(sort, filter)
+                    await taskStore.fetchTasks(sort, filter)
+                    Swal.fire(
+                        'Success!',
+                        'Your file has been restored.',
+                        'success'
+                    )
+                }catch(err){
+                    console.log(err)
+                }
+            }
+        })
     }
 
     const deleteTask = async (id) => {
@@ -104,9 +139,8 @@
         }).then(async (result) => {
             if (result.isConfirmed){
                 try{
-                    await axios.delete('api/tasks/' + id + '')
+                    await axios.delete('api/delete_task/' + id + '')
 
-                    await taskStore.fetchTasks(sort, filter)
                     await recycleTaskStore.fetchTasks(sort, filter)
 
                     Swal.fire(
@@ -123,7 +157,7 @@
     
     onMounted(async()=>{
       //axios.defaults.headers.common['Authorization'] = 'Bearer ' + userStore.token
-      await taskStore.fetchTasks(sort, filter) 
+      await recycleTaskStore.fetchTasks(sort, filter) 
     })
 </script>
 

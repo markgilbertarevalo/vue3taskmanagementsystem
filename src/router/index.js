@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useUserStore } from "@/store/user-store";
-//import { useEditSubTaskStore } from "@/store/editsubtask-store.js";
+import RecycleBinView from "@/views/RecycleBinView.vue";
 import HomeView from "../views/HomeView.vue";
 import LoginView from "@/views/LoginView.vue";
 import RegisterView from "@/views/RegisterView.vue";
@@ -18,6 +18,14 @@ const routes = [
     },
     name: "home",
     component: HomeView,
+  },
+  {
+    path: "/recyclebin",
+    beforeEnter: (to, from, next) => {
+      useUserStore().id ? next() : next("/login");
+    },
+    name: "RecycleBin",
+    component: RecycleBinView,
   },
   {
     path: "/addsubtask",
