@@ -121,9 +121,13 @@
         })
     }
     
-    onMounted(async()=>{
+    onMounted(()=>{
       //axios.defaults.headers.common['Authorization'] = 'Bearer ' + userStore.token
-      await taskStore.fetchTasks(sort, filter) 
+      setTimeout(() => {  if(userStore.token != null){
+        taskStore.fetchTasks(sort, filter) 
+        //alert(userStore.token)
+      }
+      }, 500)
     })
 </script>
 

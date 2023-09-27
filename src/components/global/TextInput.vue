@@ -1,6 +1,6 @@
 <template>
     <!-- <div class="form-outline mb-4"> -->
-        <label class="form-label" for="form3Example3">{{ label }}</label>
+        <label class="form-label">{{ label }}</label>
         <input v-model="inputComputed" class="form-control form-control-lg"
             :placeholder="placeholder" :type="inputType"/>
         <span v-if="error" class="text-danger">
